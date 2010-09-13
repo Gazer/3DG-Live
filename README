@@ -1,0 +1,5 @@
+Dependencies
+============
+
+ * Nodejs (http://www.nodejs.org)
+ * node-mysql (http://github.com/felixge/node-mysql)
