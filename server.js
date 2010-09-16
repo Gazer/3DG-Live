@@ -74,7 +74,7 @@ var Live3DG = function() {
       if (results.length > 0) {
         last_post.postid = results[0].max - 1;
 
-        sys.puts('Empezando a leer desde ' + last_post.postid);
+        sys.puts('Last postid ' + last_post.postid);
 
         http.createServer(function(request, response) {
             var uri = url.parse(request.url, true);
