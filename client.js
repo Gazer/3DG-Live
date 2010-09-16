@@ -60,7 +60,7 @@ function create_post(post) {
   filter_thread = "<a href='javascript:void(0);' class='filter_thread' rel='"+post.threadid+"'>Ver solo este hilo</a>";
   filter_user = "<a href='javascript:void(0);' class='filter_user' rel='"+post.userid+"'>Ver solo este usuario</a>";
   member = "<a target='_blank' href='http://foros.3dgames.com.ar/members/"+post.userid+".html'>"+post.username+"</a>";
-  avatar = "<div class='image' style='background: url(http://profiles.3dgames.com.ar/avatar/"+post.user_hash+"?size=tiny);'></div>";
+  avatar = "<div class='image' style='background: url(http://foros.3dgames.com.ar/image.php?u="+post.userid+");'></div>";
 
   var template = ' \
     <div class="post"> \

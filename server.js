@@ -9,7 +9,7 @@ var Live3DG = function() {
   var client = new Client();
   var last_post = {postid: -1};
   var bbcode_quote =  new RegExp('\\[quote[^]].*](.*?)\\[/\\1]');
-  var query = 'select user.userid,user.user_hash, post.pagetext, post.postid, post.threadid, thread.title as title, post.dateline as updated_at, post.username as username from post inner join thread on thread.threadid = post.threadid inner join user on user.userid = post.userid where post.postid > ? and forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) order by postid asc limit 1;'
+  var query = 'select user.userid, post.pagetext, post.postid, post.threadid, thread.title as title, post.dateline as updated_at, post.username as username from post inner join thread on thread.threadid = post.threadid inner join user on user.userid = post.userid where post.postid > ? and forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) order by postid asc limit 1;'
 
 
   function _load_static_file(uri, response) {
