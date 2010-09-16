@@ -58,10 +58,6 @@ var Live3DG = function() {
     );
   }
 
-  function _connect() {
-    client.connect(_start_server);
-  }
-
   function _start_server() {
     sys.puts('Connected to mysql. Starting posts polling...');
     setInterval(_read_forum, 1000);
@@ -112,7 +108,7 @@ var Live3DG = function() {
         client.database = config.database;
         client.charsetNumber = 192;
 
-        _connect();
+        client.connect(_start_server);
       });
     }
   }
