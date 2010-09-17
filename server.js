@@ -16,6 +16,9 @@ var Live3DG = function() {
   router.get('/', function (request, response) {
     _load_static_file('index.html', response);
   });
+  router.get('/index.html', function (request, response) {
+    _load_static_file('index.html', response);
+  });
 
   router.get('/media/(.*)', function (request, response, file) {
     _load_static_file('media/' + file, response);
