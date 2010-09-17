@@ -12,14 +12,33 @@ function init()
     }
   });
 
+  setTimeout(set_title, 1200);
   setTimeout(update, 1000);
 }
 
+function set_title()
+{
+  if (last_post.postid == 0) {
+    setTimeout(set_title, 1200);
+    return;
+  }
+  url = window.location.toString().split('#')[1];
+
+  if (url.match(/user/)) {
+    text = last_post.username;
+  } else if (url.match(/thread/)) {
+    text = last_post.title;
+  } else if (url.match(/forum/)) {
+    text = last_post.forum_title;
+  }
+
+  $(".info h2").html("&Uacute;ltimas entradas de <strong>" + text + "</strong>");
+}
 function create_post(post) {
   url = "<a target='_blank' href='http://foros.3dgames.com.ar/showthread.php?p="+post.postid+"#"+post.postid+"'>Ver</a>";
-  filter_thread = "<a href='#stream/thread/"+post.threadid+"' target='_blank'>Ver solo este hilo</a>";
-  filter_user = "<a href='#stream/user/"+post.userid+"' target='_blank'>Ver solo este usuario</a>";
-  filter_forum = "<a href='#stream/forum/"+post.forumid+"' target='_blank'>Ver solo este foro</a>";
+  filter_thread = "<a href='#stream/thread/"+post.threadid+"' target='_blank'>Seguir hilo</a>";
+  filter_user = "<a href='#stream/user/"+post.userid+"' target='_blank'>Seguir <strong>"+post.username+"</strong></a>";
+  filter_forum = "<a href='#stream/forum/"+post.forumid+"' target='_blank'>Seguir <strong>"+post.forum_title+"</strong></a>";
   member = "<a target='_blank' href='http://foros.3dgames.com.ar/members/"+post.userid+".html'>"+post.username+"</a>";
   avatar = "<img src='http://foros.3dgames.com.ar/image.php?u="+post.userid+"' />";
 
@@ -40,7 +59,7 @@ function create_post(post) {
       </div> \
       <div class="url"> ' + url +'</div> \
       <div class="filters"> \
-        ' + filter_forum + ' | ' + filter_thread + ' | ' + filter_user + ' \
+        ' + filter_forum + ' | ' + filter_user + ' | ' + filter_thread + ' \
       </div> \
       <div class="clear"> \
     </div> \

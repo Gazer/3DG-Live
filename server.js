@@ -10,7 +10,14 @@ var sys = require("sys"),
 var Live3DG = function() {
   var client = new Client();
   var bbcode_quote =  new RegExp('\\[quote[^]].*](.*?)\\[/\\1]');
-  var query = 'select user.userid, post.pagetext, post.postid, post.threadid, thread.forumid, thread.title as title, post.dateline as updated_at, post.username as username from post inner join thread on thread.threadid = post.threadid inner join user on user.userid = post.userid where post.postid > ? and forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) order by postid asc limit 1;';
+  var query = ' \
+    select user.userid, post.pagetext, post.postid, post.threadid, thread.forumid, thread.title as title, \
+    forum.title as forum_title, post.dateline as updated_at, post.username as username from post \
+      left join thread on thread.threadid = post.threadid \
+      left join forum on thread.forumid = forum.forumid \
+      left join user on user.userid = post.userid \
+      where thread.forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) and post.postid > ? \
+      order by postid asc limit 1;';
 
   var router = new Router();
   router.get('/', function (request, response) {
