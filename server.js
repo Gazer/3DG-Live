@@ -9,7 +9,8 @@ var sys = require("sys"),
 
 var Live3DG = function() {
   var client = new Client();
-  var bbcode_quote =  new RegExp('\\[quote[^]].*](.*?)\\[/\\1]');
+  var tags = 'quote|b|i|u|url|quote|code|img|color|size|yt|spoiler';
+  var bbcode_quote =  new RegExp("\\[/?(?:"+tags+")[^]*].*\\]", "img");
   var query = ' \
     select user.userid, post.pagetext, post.postid, post.threadid, thread.forumid, thread.title as title, \
     forum.title as forum_title, post.dateline as updated_at, post.username as username from post \
@@ -77,7 +78,7 @@ var Live3DG = function() {
 
   function _remove_bbcode(text)
   {
-    return text.replace(/\[\/?(?:b|i|u|url|quote|code|img|color|size)*?.*?\]/img, '');
+    return text.toString().replace("\n", '').replace("\r", '').replace(bbcode_quote, '');
   }
 
   function _read_forum()
