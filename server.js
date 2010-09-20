@@ -29,34 +29,26 @@ var Live3DG = function() {
   });
 
   router.get('/stream', function (request, response) {
-    response.writeHead(200, { "Content-Type" : "application/javascript; charset=utf8" });
-    response.write(JSON.stringify(follower.last_post()));
-    response.end();
+    _respond_with_post(follower.last_post(), response);
   });
 
   router.get('/stream/user/(.*)', function (request, response, userid) {
-    post = follower.fetch_by_user(userid);
-
-    response.writeHead(200, { "Content-Type" : "application/javascript; charset=utf8" });
-    response.write(JSON.stringify(post));
-    response.end();
+    _respond_with_post(follower.fetch_by_user(userid), response);
   });
 
   router.get('/stream/thread/(.*)', function (request, response, threadid) {
-    post = follower.fetch_by_thread(threadid);
-
-    response.writeHead(200, { "Content-Type" : "application/javascript; charset=utf8" });
-    response.write(JSON.stringify(post));
-    response.end();
+    _respond_with_post(follower.fetch_by_thread(threadid), response);
   });
 
   router.get('/stream/forum/(.*)', function (request, response, forumid) {
-    post = follower.fetch_by_forum(forumid);
+    _respond_with_post(follower.fetch_by_forum(forumid), response);
+  });
 
+  function _respond_with_post(post, response) {
     response.writeHead(200, { "Content-Type" : "application/javascript; charset=utf8" });
     response.write(JSON.stringify(post));
     response.end();
-  });
+  }
 
   function _load_static_file(uri, response) {
 	  var filename = path.join(process.cwd(), uri);
