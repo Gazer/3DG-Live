@@ -20,10 +20,7 @@ var Live3DG = function() {
       order by postid asc limit 1;';
 
   var router = new Router();
-  router.get('/', function (request, response) {
-    _load_static_file('index.html', response);
-  });
-  router.get('/index.html', function (request, response) {
+  router.get('(/|/index.html)', function (request, response) {
     _load_static_file('index.html', response);
   });
 
