@@ -101,10 +101,11 @@ var Live3DG = function() {
         }
 
         if (results.length > 0) {
-          results[0].pagetext = _remove_bbcode(results[0].pagetext)
+          results[0].pagetext = _remove_bbcode(results[0].pagetext);
           follower.update(results[0]);
-          //sys.puts(sys.inspect(results[0], true, null));
         }
+
+        setTimeout(_read_forum, 1000);
       }
     );
   }
@@ -119,7 +120,7 @@ var Live3DG = function() {
 
       if (results.length > 0) {
         follower.update({userid: 0, threadid: 0, postid: results[0].max - 1});
-        setInterval(_read_forum, 1000);
+        setTimeout(_read_forum, 1000);
         router.start();
       }
     });
