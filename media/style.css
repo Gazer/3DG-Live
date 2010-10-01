@@ -320,3 +320,8 @@ div#container {
   padding: 4px 30px 4px;
   text-align: right;
 }
+.android {
+  position: absolute;
+  right: 10px;
+  top: 90px;
+}
