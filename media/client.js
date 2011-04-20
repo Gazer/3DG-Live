@@ -74,36 +74,46 @@ function create_post(post) {
     .prependTo('#posts');
 }
 
+function process_post(post)
+{
+  if (last_post.postid != post.postid) {
+    last_post = post;
+
+    if (!paused) {
+      if ((filters.threadid === undefined) && (filters.userid === undefined)) {
+        create_post(post);
+      } else if ((filters.threadid === post.threadid) && (filters.userid === undefined)) {
+        create_post(post);
+      } else if ((filters.threadid === undefined) && (filters.userid === post.userid)) {
+        create_post(post);
+      } else if ((filters.threadid === post.threadid) && (filters.userid === post.userid)) {
+        create_post(post);
+      }
+    }
+
+    if ($('#posts .post').length > 10) {
+      $("#posts .post:last-child").fadeOut(function () {
+        $(this).remove();
+      });
+    }
+  }
+  update();
+}
+
 function update() {
   url = window.location.toString().split('#')[1];
   if (url == undefined) {
     url = 'stream';
   }
 
-  var jqxhr = $.getJSON(url, function(post) {
-    if (last_post.postid != post.postid) {
-      last_post = post;
-
-      if (!paused) {
-        if ((filters.threadid === undefined) && (filters.userid === undefined)) {
-          create_post(post);
-        } else if ((filters.threadid === post.threadid) && (filters.userid === undefined)) {
-          create_post(post);
-        } else if ((filters.threadid === undefined) && (filters.userid === post.userid)) {
-          create_post(post);
-        } else if ((filters.threadid === post.threadid) && (filters.userid === post.userid)) {
-          create_post(post);
-        }
-      }
-
-      if ($('#posts .post').length > 10) {
-        $("#posts .post:last-child").fadeOut(function () {
-          $(this).remove();
-        });
-      }
-    }
-    update();
-  }).error(function() { update(); });
-
+  $.ajax({
+    url: url,
+    dataType: 'json',
+    data: {},
+    success: process_post,
+    completed: update,
+    error: update,
+    timeout: 5000 //3 second timeout
+  });
 
 }
