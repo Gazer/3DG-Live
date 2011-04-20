@@ -1,6 +1,7 @@
 var last_post = {postid: 0, title: 'fake', username: 'cake'};
 var filters = {threadid: undefined, userid: undefined};
 var paused = false;
+var since = 0;
 
 function init()
 {
@@ -74,8 +75,10 @@ function create_post(post) {
     .prependTo('#posts');
 }
 
-function process_post(post)
+function process_post(data)
 {
+  post = data.post
+  since = Date.parse(data.timestamp);
   if (last_post.postid != post.postid) {
     last_post = post;
 
@@ -107,13 +110,13 @@ function update() {
   }
 
   $.ajax({
+    cache: false,
     url: url,
     dataType: 'json',
-    data: {},
+    data: {since: since},
     success: process_post,
     completed: update,
-    error: update,
-    timeout: 5000 //3 second timeout
+    error: update
   });
 
 }

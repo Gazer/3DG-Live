@@ -3,9 +3,44 @@ var sys = require("sys"),
     path = require("path"),
     fs = require("fs"),
     url = require("url"),
+    qs = require("querystring"),
     Client = require('mysql').Client,
-    Router = require('./router'),
-    Follower = require('./follow');
+    Router = require('./router');
+
+var follower = new function () {
+  var callbacks = [],
+      lastPost = [];
+
+  this.query = function (request, callback) {
+    var since = parseInt(qs.parse(url.parse(request.url).query).since, 10);
+    var matching = [];
+
+    for (var i = 0; i < lastPost.length; i++) {
+      var post = lastPost[i];
+
+      if (post.timestamp > since) {
+        matching.push(post)
+      }
+    }
+
+    if (matching.length != 0) {
+      callback(matching[0]);
+    } else {
+      callbacks.push({ timestamp: new Date(), callback: callback });
+    }
+  };
+
+  this.appendPost = function (post) {
+    while (callbacks.length > 0) {
+      callbacks.shift().callback({ timestamp: new Date(), post: post });
+    }
+
+    lastPost.push({ timestamp: new Date(), post: post });
+
+    while (lastPost.length > 25)
+      lastPost.shift();
+  };
+};
 
 var Live3DG = function() {
   var client = new Client();
@@ -34,9 +69,8 @@ var Live3DG = function() {
   });
 
   router.get('/stream', function (request, response) {
-    var f = new Follower(request, response);
-
-    f.on("updated", function (post) {
+    follower.query(request, function (post) {
+      sys.puts(post.post.postid);
       _respond_with_post(post, response);
 	  });
   });
@@ -123,7 +157,7 @@ var Live3DG = function() {
 
         if (results.length > 0) {
           results[0].pagetext = _remove_bbcode(results[0].pagetext);
-          Follower.update(results[0]);
+          follower.appendPost(results[0]);
         } else {
           sys.puts("No results");
         }
