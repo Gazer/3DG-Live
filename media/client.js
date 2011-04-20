@@ -2,6 +2,21 @@ var last_post = {postid: 0, title: 'fake', username: 'cake'};
 var filters = {threadid: undefined, userid: undefined};
 var paused = false;
 var since = 0;
+var unread = 0;
+var hasFocus = false;
+
+$(function () {
+  $(window).bind("blur", function() {
+    hasFocus = false;
+    updateTitle();
+  });
+
+  $(window).bind("focus", function() {
+    hasFocus = true;
+    unread = 0;
+    updateTitle();
+  });
+});
 
 function init()
 {
@@ -19,11 +34,12 @@ function init()
 
 function set_title()
 {
+  var text;
   if (last_post.postid == 0) {
     setTimeout(set_title, 1200);
     return;
   }
-  url = window.location.toString().split('#')[1];
+  url = window.location.toString().split('#')[1] || 'stream';
 
   if (url.match(/user/)) {
     text = last_post.username;
@@ -33,8 +49,10 @@ function set_title()
     text = last_post.forum_title;
   }
 
-  $(".info h2").html("&Uacute;ltimas entradas de <strong>" + text + "</strong>");
+  if (text)
+    $(".info h2").html("&Uacute;ltimas entradas de <strong>" + text + "</strong>");
 }
+
 function create_post(post) {
   url = "<a target='_blank' href='http://foros.3dgames.com.ar/showthread.php?p="+post.postid+"#"+post.postid+"'>Ver</a>";
   filter_thread = "<a href='#stream/thread/"+post.threadid+"' target='_blank'>Seguir hilo</a>";
@@ -73,6 +91,20 @@ function create_post(post) {
       "opacity": "toggle"
     }, "slow")
     .prependTo('#posts');
+
+  if (!hasFocus)
+    unread++;
+
+  updateTitle();
+}
+
+function updateTitle()
+{
+  if (unread) {
+    document.title = "3DG Live (" + unread.toString() + ")";
+  } else {
+    document.title = "3DG Live";
+  }
 }
 
 function process_post(data)
