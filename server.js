@@ -76,30 +76,24 @@ var Live3DG = function() {
   });
 
   router.get('/stream/user/(.*)', function (request, response, userid) {
-    var f = new Follower(request, response);
-
-    f.on("updated", function (post) {
-      if (post.userid == userid) {
+    follower.query(request, function (post) {
+      if (post.post.userid == userid) {
         _respond_with_post(post, response);
       }
 	  });
   });
 
   router.get('/stream/thread/(.*)', function (request, response, threadid) {
-    var f = new Follower(request, response);
-
-    f.on("updated", function (post) {
-      if (post.threadid == threadid) {
+    follower.query(request, function (post) {
+      if (post.post.threadid == threadid) {
         _respond_with_post(post, response);
       }
 	  });
   });
 
   router.get('/stream/forum/(.*)', function (request, response, forumid) {
-    var f = new Follower(request, response);
-
-    f.on("updated", function (post) {
-      if (post.forumid == forumid) {
+    follower.query(request, function (post) {
+      if (post.post.forumid == forumid) {
         _respond_with_post(post, response);
       }
 	  });
