@@ -80,7 +80,7 @@ function update() {
     url = 'stream';
   }
 
-  $.getJSON(url, function(post) {
+  var jqxhr = $.getJSON(url, function(post) {
     if (last_post.postid != post.postid) {
       last_post = post;
 
@@ -102,6 +102,8 @@ function update() {
         });
       }
     }
-    setTimeout(update, 1000);
-  });
+    update();
+  }).error(function() { update(); });
+
+
 }
