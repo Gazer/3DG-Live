@@ -11,29 +11,49 @@ var follower = new function () {
   var callbacks = [],
       lastPost = [];
 
-  this.query = function (request, callback) {
+  this.query = function (request, callback, condition) {
     var since = parseInt(qs.parse(url.parse(request.url).query).since, 10);
     var matching = [];
 
     for (var i = 0; i < lastPost.length; i++) {
       var post = lastPost[i];
+      var valid = true;
 
-      if (post.timestamp > since) {
+      if (condition) {
+        valid = condition(post);
+      }
+
+      if ((post.timestamp > since) && valid) {
         matching.push(post)
       }
     }
 
+
     if (matching.length != 0) {
       callback(matching[0]);
     } else {
-      callbacks.push({ timestamp: new Date(), callback: callback });
+      callbacks.push({ timestamp: new Date(), callback: callback, condition: condition });
     }
   };
 
   this.appendPost = function (post) {
+    var requere = [];
     while (callbacks.length > 0) {
-      callbacks.shift().callback({ timestamp: new Date(), post: post });
+      var callback = callbacks.shift(), valid = true;
+
+      if (callback.condition) {
+        valid = callback.condition({post: post});
+      }
+
+      if (valid) {
+        callback.callback({ timestamp: new Date(), post: post });
+      } else {
+
+        requere.push(callback);
+      }
     }
+
+    callbacks = requere;
 
     lastPost.push({ timestamp: new Date(), post: post });
 
@@ -77,25 +97,34 @@ var Live3DG = function() {
 
   router.get('/stream/user/(.*)', function (request, response, userid) {
     follower.query(request, function (post) {
+      _respond_with_post(post, response);
+	  }, function (post) {
       if (post.post.userid == userid) {
-        _respond_with_post(post, response);
+        return true;
       }
+      return false;
 	  });
   });
 
   router.get('/stream/thread/(.*)', function (request, response, threadid) {
     follower.query(request, function (post) {
+      _respond_with_post(post, response);
+	  }, function (post) {
       if (post.post.threadid == threadid) {
-        _respond_with_post(post, response);
+        return true;
       }
+      return false;
 	  });
   });
 
   router.get('/stream/forum/(.*)', function (request, response, forumid) {
     follower.query(request, function (post) {
-      if (post.post.forumid == forumid) {
         _respond_with_post(post, response);
+	  }, function (post) {
+      if (post.post.forumid == forumid) {
+        return true;
       }
+      return false;
 	  });
   });
 
