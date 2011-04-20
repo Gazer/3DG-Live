@@ -5,7 +5,7 @@ var sys = require("sys"),
     url = require("url"),
     Client = require('mysql').Client,
     Router = require('./router'),
-    follower = require('./follow');
+    Follower = require('./follow');
 
 var Live3DG = function() {
   var client = new Client();
@@ -17,8 +17,8 @@ var Live3DG = function() {
       left join thread on thread.threadid = post.threadid \
       left join forum on thread.forumid = forum.forumid \
       left join user on user.userid = post.userid \
-      where thread.forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) and post.postid > ? \
-      order by postid asc limit 1;';
+      where thread.forumid NOT IN (5,16,106,108,109,96,284,367,141,184,253,252,138) and post.postid = ? \
+      limit 1;';
 
   var router = new Router();
   router.get('(/|/index.html)', function (request, response) {
@@ -29,20 +29,53 @@ var Live3DG = function() {
     _load_static_file('media/' + file, response);
   });
 
+  router.get('/widget/', function (request, response, file) {
+    _load_static_file('widget.html', response);
+  });
+
   router.get('/stream', function (request, response) {
-    _respond_with_post(follower.last_post(), response);
+    var f = new Follower(request, response);
+
+    f.on("updated", function (post) {
+      _respond_with_post(post, response);
+	  });
   });
 
   router.get('/stream/user/(.*)', function (request, response, userid) {
-    _respond_with_post(follower.fetch_by_user(userid), response);
+    var f = new Follower(request, response);
+
+    f.on("updated", function (post) {
+      if (post.userid == userid) {
+        _respond_with_post(post, response);
+      }
+	  });
   });
 
   router.get('/stream/thread/(.*)', function (request, response, threadid) {
-    _respond_with_post(follower.fetch_by_thread(threadid), response);
+    var f = new Follower(request, response);
+
+    f.on("updated", function (post) {
+      if (post.threadid == threadid) {
+        _respond_with_post(post, response);
+      }
+	  });
   });
 
   router.get('/stream/forum/(.*)', function (request, response, forumid) {
-    _respond_with_post(follower.fetch_by_forum(forumid), response);
+    var f = new Follower(request, response);
+
+    f.on("updated", function (post) {
+      if (post.forumid == forumid) {
+        _respond_with_post(post, response);
+      }
+	  });
+  });
+
+  router.get('/push/(.*)', function (request, response, postid) {
+    _read_forum(postid);
+    response.writeHead(200, { "Content-Type" : "text/html; charset=utf8" });
+    response.write("Ok");
+    response.end();
   });
 
   function _respond_with_post(post, response) {
@@ -81,21 +114,19 @@ var Live3DG = function() {
     return text.toString().replace("\n", '').replace("\r", '').replace(bbcode_quote, '');
   }
 
-  function _read_forum()
+  function _read_forum(postid)
   {
-    var last_post = follower.last_post();
-
-    client.query(query, [last_post.postid], function selectCb(err, results, fields) {
+    client.query(query, [postid], function selectCb(err, results, fields) {
         if (err) {
           throw err;
         }
 
         if (results.length > 0) {
           results[0].pagetext = _remove_bbcode(results[0].pagetext);
-          follower.update(results[0]);
+          Follower.update(results[0]);
+        } else {
+          sys.puts("No results");
         }
-
-        setTimeout(_read_forum, 1000);
       }
     );
   }
@@ -103,17 +134,7 @@ var Live3DG = function() {
   function _start_server() {
     sys.puts('Connected to mysql. Starting posts polling...');
 
-    client.query('SELECT max(postid) as max from post', function (err, results, fields) {
-      if (err) {
-        throw err;
-      }
-
-      if (results.length > 0) {
-        follower.update({userid: 0, threadid: 0, postid: results[0].max - 1});
-        setTimeout(_read_forum, 1000);
-        router.start();
-      }
-    });
+    router.start();
   }
 
   return {
